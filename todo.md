@@ -13,10 +13,10 @@ This document outlines the step-by-step porting tasks for each module from `go-s
 - [ ] Add unit tests for JWT success/failure cases.
 
 ## 3. Caching (`src/caches/`)
-- [ ] Implement abstract cache interface/trait (`Cache`).
-- [ ] Implement Memory Cache (`sync::RwLock<HashMap>`).
-- [ ] Implement SQLite Cache (using `rusqlite`).
-- [ ] Add unit tests for memory and SQLite caching backends.
+- [x] Implement abstract cache interface/trait (`Cache`).
+- [x] Implement Memory Cache (`sync::RwLock<HashMap>`).
+- [x] Implement SQLite Cache (using `rusqlite`).
+- [x] Add unit tests for memory and SQLite caching backends.
 
 ## 4. Error Codes & Messages (`src/codes/`)
 - [x] Define standard error/status codes and messages (mirroring Go SDK codes package).

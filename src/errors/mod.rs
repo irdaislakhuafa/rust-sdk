@@ -3,10 +3,13 @@ use crate::language::Language;
 use std::error::Error;
 use std::fmt;
 
+/// Convenience alias for a boxed, thread-safe error (common across SDK modules).
+pub type SdkError = Box<dyn std::error::Error + Send + Sync>;
+
 #[derive(Debug)]
 pub struct Stacktrace {
     pub message: String,
-    pub cause: Option<Box<dyn Error + Send + Sync>>,
+    pub cause: Option<SdkError>,
     pub code: Code,
     pub file: String,
     pub function: String,
@@ -41,7 +44,7 @@ impl Error for Stacktrace {
     }
 }
 
-// `Box<dyn Error + Send + Sync>` (the `cause` field) does not implement
+// `SdkError` (the `cause` field) does not implement
 // `PartialEq`/`Eq`, so we cannot `#[derive(PartialEq, Eq)]` on `Stacktrace`.
 // Compare the simple fields directly and the boxed error by pointer identity.
 impl PartialEq for Stacktrace {
@@ -60,21 +63,21 @@ impl PartialEq for Stacktrace {
 impl Eq for Stacktrace {}
 
 #[derive(Debug)]
-pub struct App {
+pub struct AppError {
     pub code: Code,
     pub title: String,
     pub body: String,
-    pub sys: Option<Box<dyn Error + Send + Sync>>,
+    pub sys: Option<SdkError>,
 }
 
-pub type AppError = App;
 
-impl App {
+
+impl AppError {
     pub fn new(
         code: Code,
         title: impl Into<String>,
         body: impl Into<String>,
-        sys: Option<Box<dyn Error + Send + Sync>>,
+        sys: Option<SdkError>,
     ) -> Self {
         Self {
             code,
@@ -86,15 +89,15 @@ impl App {
 
     pub fn safe_convert<'a>(
         err: &'a (dyn Error + Send + Sync + 'static),
-    ) -> Result<&'a App, String> {
-        match err.downcast_ref::<App>() {
+    ) -> Result<&'a AppError, String> {
+        match err.downcast_ref::<AppError>() {
             Some(app_err) => Ok(app_err),
             None => Err(format!("Failed to convert error to AppError: {}", err)),
         }
     }
 }
 
-impl fmt::Display for App {
+impl fmt::Display for AppError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(sys) = &self.sys {
             write!(f, "{}", sys)
@@ -104,7 +107,7 @@ impl fmt::Display for App {
     }
 }
 
-impl Error for App {
+impl Error for AppError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.sys
             .as_ref()
@@ -112,9 +115,9 @@ impl Error for App {
     }
 }
 
-// Same as above: `Box<dyn Error + Send + Sync>` (the `sys` field) is not
+// Same as above: `SdkError` (the `sys` field) is not
 // `PartialEq`/`Eq`, so `#[derive(PartialEq, Eq)]` is unavailable.
-impl PartialEq for App {
+impl PartialEq for AppError {
     fn eq(&self, other: &Self) -> bool {
         self.code == other.code
             && self.title == other.title
@@ -126,7 +129,7 @@ impl PartialEq for App {
             }
     }
 }
-impl Eq for App {}
+impl Eq for AppError {}
 
 // ---- core functions ----
 
@@ -139,7 +142,7 @@ pub fn get_code(err: &(dyn Error + Send + Sync + 'static)) -> Code {
 }
 
 fn create(
-    cause: Option<Box<dyn Error + Send + Sync>>,
+    cause: Option<SdkError>,
     code: Code,
     message: String,
     loc: &'static std::panic::Location<'static>,
@@ -164,15 +167,15 @@ fn create(
 }
 
 #[track_caller]
-pub fn new_with_code(code: Code, message: impl Into<String>) -> Box<dyn Error + Send + Sync> {
+pub fn new_with_code(code: Code, message: impl Into<String>) -> SdkError {
     let loc = std::panic::Location::caller();
     Box::new(create(None, code, message.into(), loc))
 }
 
 #[track_caller]
 pub fn get_caller(
-    cause: Box<dyn Error + Send + Sync>,
-) -> Result<(String, usize, String), Box<dyn Error + Send + Sync>> {
+    cause: SdkError,
+) -> Result<(String, usize, String), SdkError> {
     let loc = std::panic::Location::caller();
     if let Some(st) = cause.downcast_ref::<Stacktrace>() {
         return Ok((st.file.clone(), st.line, st.message.clone()));
@@ -183,8 +186,8 @@ pub fn get_caller(
 
 #[track_caller]
 pub fn get_caller_opt(
-    cause: Option<Box<dyn Error + Send + Sync>>,
-) -> Result<(String, usize, String), Box<dyn Error + Send + Sync>> {
+    cause: Option<SdkError>,
+) -> Result<(String, usize, String), SdkError> {
     let loc = std::panic::Location::caller();
     match cause {
         None => Err(Box::new(create(
@@ -203,14 +206,14 @@ pub fn get_caller_opt(
     }
 }
 
-pub fn compile(err: Box<dyn Error + Send + Sync>, lang: Language) -> (u16, App) {
+pub fn compile(err: SdkError, lang: Language) -> (u16, AppError) {
     let code = get_code(err.as_ref());
     let msgs = crate::codes::get_code_messages(code);
 
     if let Some(msg) = msgs.get(&lang) {
         return (
             msg.status_code,
-            App {
+            AppError {
                 code,
                 title: msg.title.clone(),
                 body: msg.body.clone(),
@@ -221,7 +224,7 @@ pub fn compile(err: Box<dyn Error + Send + Sync>, lang: Language) -> (u16, App) 
 
     (
         500,
-        App {
+        AppError {
             code,
             title: "Service Error Not Defined".to_string(),
             body: "Unknown error. Please contact admin".to_string(),
