@@ -3,6 +3,7 @@ mod appcontext_test;
 
 use crate::language;
 
+/// Interface trait representing the context contract (mirroring Go's context.Context interface).
 pub trait Interface {
     // getters
     fn get_accept_language(&self) -> language::Language;
@@ -19,6 +20,7 @@ pub trait Interface {
     fn set_request_start_time(&mut self, start_time: std::time::SystemTime) -> &mut Self;
 }
 
+/// Default implementation of the AppContext contract.
 pub struct AppContext {
     accept_language: language::Language,
     request_id: String,
