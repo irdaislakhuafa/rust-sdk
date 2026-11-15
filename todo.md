@@ -54,9 +54,9 @@ This document outlines the step-by-step porting tasks for each module from `go-s
 - [ ] Add unit tests / connection verification.
 
 ## 11. Errors & Stack Traces (`src/errors/`)
-- [ ] Implement custom application error type (`AppError`).
-- [ ] Implement stack trace capture and formatting.
-- [ ] Add unit tests for error wrapping and stack traces.
+- [x] Implement custom application error type (`AppError`).
+- [x] Implement stack trace capture and formatting.
+- [x] Add unit tests for error wrapping and stack traces.
 
 ## 12. File System Helpers (`src/files/`)
 - [ ] Implement file I/O helper routines (read, write, exists, remove).
