@@ -1,9 +1,8 @@
-use crate::appcontext;
-
-use super::*;
+use crate::appcontext::{self, Interface};
+use crate::language;
 
 #[test]
-fn test_app_context_setter_and_getter() {
+fn test_app_context_contract() {
     let now = std::time::SystemTime::now();
     let mut ctx = appcontext::AppContext::new();
 
@@ -17,7 +16,7 @@ fn test_app_context_setter_and_getter() {
         std::time::SystemTime::UNIX_EPOCH
     );
 
-    // assert setters and getters are works
+    // assert setters and getters work
     ctx.set_accept_language(language::INDONESIAN)
         .set_request_id("this_is_request_id")
         .set_service_version("v0.0.1")
