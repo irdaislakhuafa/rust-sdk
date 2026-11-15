@@ -46,6 +46,7 @@ rust-sdk/
 ## Coding Style & Architecture
 
 Inspired by clean architecture principles and the modular design of [go-sdk](https://github.com/irdaislakhuafa/go-sdk.git):
+
 - **Modular Package Structure**: Each subfolder in `src/` represents an independent, cohesive domain/utility module (mirroring `go-sdk` packages like `appcontext`, `auth`, `caches`, `cryptography`, `db`, `errors`, etc.).
 - **Module Tree Management**: Explicit module declarations in `src/lib.rs` (`pub mod ...`), following standard idiomatic Rust module hierarchy.
 - **Explicit Types & Context**: Strong typing, explicit error handling with stack traces, and safe memory management without hidden side-effects.
