@@ -58,3 +58,14 @@ Inspired by clean architecture principles and the modular design of [go-sdk](htt
 - **Rust SDK (`rust-sdk`)**: Current Repository
 - **Go SDK Template (`go-sdk`)**: [https://github.com/irdaislakhuafa/go-sdk.git](https://github.com/irdaislakhuafa/go-sdk.git)
 - **NusaTrade API Reference**: `/home/i/Projects/SelfInitiates/nusatrade/nusatrade-api/plans/changes/00-project-foundation.md`
+
+
+## Error handling (`errors` + `codes`)
+
+- **Alias:** `crate::errors::SdkError = Box<dyn std::error::Error + Send + Sync>` is the standard return type for fallible SDK operations.
+- **Codes:** use `crate::codes::Code` (and `CodeExt`) to represent stable error/status categories (e.g. `Code::CacheKeyNotFound`, `Code::SqlInit`).
+- **Creating errors:** prefer `crate::errors::new_with_code(Code::..., "message") -> SdkError` (captures caller file/line via `#[track_caller]`).
+- **Inspecting codes:** use `crate::errors::get_code(&*err)`; it returns `Code::NoCode` if the error is not a stacktrace carrying a code.
+- **Structured app errors:** `crate::errors::AppError` carries `code`, `title`, `body`, optional wrapped `sys: Option<SdkError>`. Build with `AppError::new(...)`.
+- **Localization/HTTP mapping:** `crate::errors::compile(err, lang)` returns `(u16, AppError)` using `crate::codes::get_code_messages(...)` and language mappings.
+- **Guideline:** construct errors with `new_with_code` and attach semantic `Code` values; avoid ad-hoc string-only errors in SDK APIs when a `Code` exists.
