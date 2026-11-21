@@ -44,11 +44,11 @@ This document outlines the step-by-step porting tasks for each module from `go-s
 
 ## 8. Cryptography (`src/cryptography/`)
 
-- [ ] Implement SHA-256 hashing.
-- [ ] Implement Bcrypt password hashing and verification (`bcrypt` crate).
-- [ ] Implement Argon2 hashing and verification (`argon2` crate).
-- [ ] Implement AES-256-GCM authenticated encryption/decryption (`aes-gcm` crate).
-- [ ] Add unit tests for all cryptographic algorithms.
+- [x] Implement SHA-256 hashing.
+- [x] Implement Bcrypt password hashing and verification (`bcrypt` crate).
+- [x] Implement Argon2 hashing and verification (`argon2` crate).
+- [x] Implement AES-256-GCM authenticated encryption/decryption (`aes-gcm` crate).
+- [x] Add unit tests for all cryptographic algorithms.
 
 ## 9. Data Structures (`src/datastructure/`)
 
