@@ -14,7 +14,6 @@ path = "src/lib.rs"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-rusqlite = { version = "0.42", features = ["bundled"] }
 sha2 = "0.10"
 hmac = "0.12"
 base64 = "0.22"
@@ -28,3 +27,6 @@ uuid = { version = "1", features = ["v4"] }
 lettre = { version = "0.11", default-features = false, features = ["builder", "smtp-transport", "rustls-tls"] }
 rust-s3 = { version = "0.38", default-features = false, features = ["sync-rustls-tls", "fail-on-err"] }
 url = "2"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "any", "sqlite", "postgres", "mysql"] }
+async-trait = "0.1"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
