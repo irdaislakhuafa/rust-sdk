@@ -58,10 +58,10 @@ This document outlines the step-by-step porting tasks for each module from `go-s
 
 ## 10. Database Connections (`src/db/`)
 
-- [ ] Implement PostgreSQL connection factory/pool (`sqlx` or `tokio-postgres`).
-- [ ] Implement SQLite connection factory.
-- [ ] Implement MySQL connection factory.
-- [ ] Add unit tests / connection verification.
+- [x] Implement PostgreSQL connection factory/pool (`sqlx`).
+- [x] Implement SQLite connection factory.
+- [x] Implement MySQL connection factory.
+- [x] Add unit tests / connection verification.
 
 ## 11. Errors & Stack Traces (`src/errors/`)
 
