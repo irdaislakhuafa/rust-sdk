@@ -10,9 +10,9 @@ This document outlines the step-by-step porting tasks for each module from `go-s
 
 ## 2. Authentication (`src/auth/`)
 
-- [ ] Port JWT token generation and validation.
-- [ ] Implement claims struct and signing/verification methods (using `jsonwebtoken` crate).
-- [ ] Add unit tests for JWT success/failure cases.
+- [x] Port JWT token generation and validation.
+- [x] Implement claims struct and signing/verification methods (using `jsonwebtoken` crate).
+- [x] Add unit tests for JWT success/failure cases.
 
 ## 3. Caching (`src/caches/`)
 
