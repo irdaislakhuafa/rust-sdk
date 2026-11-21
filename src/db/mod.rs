@@ -5,7 +5,6 @@
 
 use crate::codes::Code;
 use crate::errors::{new_with_code, SdkError};
-use crate::strformat;
 use serde::{Deserialize, Serialize};
 pub type DbPool = sqlx::AnyPool;
 

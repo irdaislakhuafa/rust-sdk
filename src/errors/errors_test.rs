@@ -18,7 +18,7 @@ fn test_app_error_creation_and_conversion() {
 #[test]
 fn test_get_caller_success() {
     let err = new_with_code(Code::BadRequest, "bad request");
-    let res = get_caller(err);
+    let res = get_caller(Some(&err));
     assert!(res.is_ok());
     let (file, line, message) = res.unwrap();
     assert_eq!(message, "bad request");
@@ -31,14 +31,14 @@ fn test_get_caller_success() {
 #[test]
 fn test_get_caller_failure() {
     let pure: SdkError = Box::new(std::io::Error::new(std::io::ErrorKind::Other, "pure error"));
-    let res = get_caller(pure);
+    let res = get_caller(Some(&pure));
     assert!(res.is_err());
     assert_eq!(res.unwrap_err().to_string(), "pure error");
 }
 
 #[test]
-fn test_get_caller_opt_none() {
-    let res = get_caller_opt(None);
+fn test_get_caller_none() {
+    let res = get_caller(None);
     assert!(res.is_err());
     assert_eq!(
         res.unwrap_err().to_string(),

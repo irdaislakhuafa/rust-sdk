@@ -93,10 +93,11 @@ This document outlines the step-by-step porting tasks for each module from `go-s
 
 ## 16. Logging (`src/log/`)
 
-- [ ] Implement log levels (`DEBUG`, `INFO`, `WARN`, `ERROR`).
-- [ ] Implement Console logger.
-- [ ] Implement File logger with rotation/storage.
-- [ ] Add unit tests.
+- [x] Implement log levels (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`, `PANIC`) with int+string values.
+- [x] Implement Console logger.
+- [x] Implement File logger with rotation/storage.
+- [x] Support multiple drivers via `MultiConfig`/`init_multi` and fanout/composite sinks.
+- [x] Add unit tests.
 
 ## 17. Operators (`src/operator/`)
 
