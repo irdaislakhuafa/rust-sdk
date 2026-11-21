@@ -160,6 +160,14 @@ pub enum Code {
     RateLimiterResetFailed,
     RateLimiterEnd,
 
+    // Log codes
+    LogStart,
+    Log,
+    LogInvalidLevel,
+    LogInitFailure,
+    LogWriteFailure,
+    LogEnd,
+
     // End of sdk code
     End,
 }
@@ -243,6 +251,12 @@ pub fn get_code_messages(code: Code) -> HashMap<language::Language, Message> {
         }
         Code::Success => {
             get_messages(messages::MsgCode::SuccessDefault)
+        }
+        Code::LogInvalidLevel => {
+            get_messages(messages::MsgCode::ErrBadRequest)
+        }
+        Code::LogInitFailure | Code::LogWriteFailure => {
+            get_messages(messages::MsgCode::ErrInternalServerError)
         }
         _ => HashMap::new(),
     }

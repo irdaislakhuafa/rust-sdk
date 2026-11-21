@@ -70,8 +70,6 @@ pub struct AppError {
     pub sys: Option<SdkError>,
 }
 
-
-
 impl AppError {
     pub fn new(
         code: Code,
@@ -173,21 +171,7 @@ pub fn new_with_code(code: Code, message: impl Into<String>) -> SdkError {
 }
 
 #[track_caller]
-pub fn get_caller(
-    cause: SdkError,
-) -> Result<(String, usize, String), SdkError> {
-    let loc = std::panic::Location::caller();
-    if let Some(st) = cause.downcast_ref::<Stacktrace>() {
-        return Ok((st.file.clone(), st.line, st.message.clone()));
-    }
-    let msg = cause.to_string();
-    Err(Box::new(create(Some(cause), Code::NoCode, msg, loc)))
-}
-
-#[track_caller]
-pub fn get_caller_opt(
-    cause: Option<SdkError>,
-) -> Result<(String, usize, String), SdkError> {
+pub fn get_caller(cause: Option<&SdkError>) -> Result<(String, usize, String), SdkError> {
     let loc = std::panic::Location::caller();
     match cause {
         None => Err(Box::new(create(
@@ -201,7 +185,7 @@ pub fn get_caller_opt(
                 return Ok((st.file.clone(), st.line, st.message.clone()));
             }
             let msg = c.to_string();
-            Err(Box::new(create(Some(c), Code::NoCode, msg, loc)))
+            Err(Box::new(create(None, Code::NoCode, msg, loc)))
         }
     }
 }
@@ -234,6 +218,6 @@ pub fn compile(err: SdkError, lang: Language) -> (u16, AppError) {
 }
 
 #[cfg(test)]
-mod errors_test;
-#[cfg(test)]
 mod errors_stacktrace_test;
+#[cfg(test)]
+mod errors_test;
