@@ -125,10 +125,10 @@ This document outlines the step-by-step porting tasks for each module from `go-s
 
 ## 22. Object Storage (`src/storage/`)
 
-- [ ] Define storage interface/trait.
-- [ ] Implement MinIO / S3 storage client.
-- [ ] Implement Dummy / Mock storage for testing.
-- [ ] Add unit tests.
+- [x] Define storage interface/trait.
+- [x] Implement MinIO / S3 storage client.
+- [x] Implement Dummy / Mock storage for testing.
+- [x] Add unit tests.
 
 ## 23. String Formatting (`src/strformat/`)
 
