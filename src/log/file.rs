@@ -1,6 +1,7 @@
 use crate::log::base::BaseLogger;
 use crate::log::config::Config;
-use crate::log::file_sink::{FileSink, SizeRotatePolicy};
+use crate::log::file_sink::{FileSink, SizeRotatePolicy, DateRotatePolicy};
+use crate::log::storage::{DateRotationInterval, RotationKind};
 use crate::log::level::Level;
 use crate::log::logger::Logger;
 use crate::log::message::LogMessage;
@@ -19,21 +20,40 @@ impl FileLogger {
             cfg.storage.file_location.clone()
         };
         let policy = if cfg.storage.rotation.enable {
-            let max_bytes = (cfg.storage.rotation.max_size as u64) * 1024 * 1024;
             let max_backups = if cfg.storage.rotation.max_backups <= 0 {
-                3
+                if cfg.storage.rotation.kind == RotationKind::Date { 7 } else { 3 }
             } else {
                 cfg.storage.rotation.max_backups as usize
             };
-            Some(Arc::new(SizeRotatePolicy {
-                max_size_bytes: if max_bytes == 0 {
-                    (crate::log::config::DEFAULT_MAX_SIZE as u64) * 1024 * 1024
-                } else {
-                    max_bytes
-                },
-                max_backups,
-            })
-                as Arc<dyn crate::log::file_sink::RotatePolicy>)
+            let max_age_days = if cfg.storage.rotation.max_age <= 0 {
+                30
+            } else {
+                cfg.storage.rotation.max_age as i64
+            };
+            match cfg.storage.rotation.kind {
+                RotationKind::Date => {
+                    let interval = cfg.storage.rotation.date_interval;
+                    let fmt = cfg.storage.rotation.date_format.clone();
+                    Some(Arc::new(DateRotatePolicy {
+                        interval,
+                        max_backups,
+                        max_age_days,
+                        date_format: fmt,
+                        now_fn: None,
+                    }) as Arc<dyn crate::log::file_sink::RotatePolicy>)
+                }
+                RotationKind::Size => {
+                    let max_bytes = (cfg.storage.rotation.max_size as u64) * 1024 * 1024;
+                    Some(Arc::new(SizeRotatePolicy {
+                        max_size_bytes: if max_bytes == 0 {
+                            (crate::log::config::DEFAULT_MAX_SIZE as u64) * 1024 * 1024
+                        } else {
+                            max_bytes
+                        },
+                        max_backups,
+                    }) as Arc<dyn crate::log::file_sink::RotatePolicy>)
+                }
+            }
         } else {
             None
         };

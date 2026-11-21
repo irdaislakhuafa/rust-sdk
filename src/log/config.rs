@@ -1,7 +1,7 @@
 // log config (port of go-sdk/log/log.go Config)
 
 use super::level::Level;
-use super::storage::{OutputConfig, StorageDriver, StorageOpt};
+use super::storage::{OutputConfig, StorageDriver, StorageOpt, RotationKind};
 
 pub const DEFAULT_SKIP_FRAME_COUNT: usize = 3;
 pub const DEFAULT_MAX_AGE: i32 = 30;
@@ -48,7 +48,7 @@ impl Config {
             if self.storage.rotation.max_age == 0 {
                 self.storage.rotation.max_age = DEFAULT_MAX_AGE;
             }
-            if self.storage.rotation.max_size == 0 {
+            if self.storage.rotation.kind == RotationKind::Size && self.storage.rotation.max_size == 0 {
                 self.storage.rotation.max_size = DEFAULT_MAX_SIZE;
             }
             if self.storage.rotation.max_backups == 0 {

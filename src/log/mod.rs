@@ -28,7 +28,7 @@ pub use logger::{CtxFieldsFn, Logger};
 pub use message::{DebugMsg, LogMessage};
 pub use multi::FanoutLogger;
 pub use sink::{CompositeSink, LogSink, WriterSink, stderr_sink, stdout_sink};
-pub use storage::{OutputConfig, StorageDriver, StorageOpt, StorageRotation};
+pub use storage::{OutputConfig, StorageDriver, StorageOpt, StorageRotation, RotationKind, DateRotationInterval};
 
 use crate::errors::SdkError;
 

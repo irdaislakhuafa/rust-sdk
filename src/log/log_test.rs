@@ -4,7 +4,7 @@ use crate::log::config::Config;
 use crate::log::level::Level;
 use crate::log::message::{DebugMsg, LogMessage};
 use crate::log::sink::{CompositeSink, LogSink, WriterSink};
-use crate::log::{Logger, StorageDriver, StorageOpt, init};
+use crate::log::{Logger, StorageDriver, StorageOpt, RotationKind, init};
 use std::sync::{Arc, Mutex};
 
 fn make_ctx() -> AppContext {
@@ -225,10 +225,12 @@ fn test_init_file_rotation() {
         file_location: file.to_string_lossy().to_string(),
         rotation: crate::log::StorageRotation {
             enable: true,
-            max_size: 1, // 1 MB? our policy treats max_size as MB -> 1MB, too big for test. Use direct sink instead.
+            kind: RotationKind::Size,
+            max_size: 1,
             max_backups: 2,
             max_age: 30,
             compress: false,
+            ..Default::default()
         },
     };
     // Instead test rotation via FileSink with small byte threshold by constructing policy directly.
@@ -464,5 +466,58 @@ fn test_fanout_ctx_fields() {
         let out = String::from_utf8(buf.lock().unwrap().clone()).unwrap();
         assert!(out.contains("\"custom\":\"v\""), "out: {}", out);
         assert!(out.contains("\"request_id\":\"req-1\""), "out: {}", out);
+    }
+}
+
+#[test]
+fn test_date_rotation_triggers_on_day_change() {
+    use crate::log::file_sink::{DateRotatePolicy, FileSink};
+    use chrono::{TimeZone, Utc};
+    use std::sync::Arc;
+
+    let dir = std::env::temp_dir().join("rustsdk_daterot");
+    let _ = std::fs::create_dir_all(&dir);
+    let file = dir.join("date.json");
+    let _ = std::fs::remove_file(&file);
+
+    // Create file with yesterday's mtime by writing then we rely on injected clock.
+    // Write initial content so file exists.
+    std::fs::write(&file, b"old\n").unwrap();
+
+    // Policy whose "now" is tomorrow relative to file mtime? Instead, inject now = file mtime day + 1.
+    let file_mtime = std::fs::metadata(&file).unwrap().modified().unwrap();
+    let file_dt: chrono::DateTime<Utc> = file_mtime.into();
+    let tomorrow = file_dt + chrono::Duration::days(1);
+
+    let policy = Arc::new(DateRotatePolicy {
+        interval: crate::log::DateRotationInterval::Daily,
+        max_backups: 5,
+        max_age_days: 0,
+        date_format: String::new(),
+        now_fn: Some(Arc::new(move || tomorrow)),
+    }) as Arc<dyn crate::log::file_sink::RotatePolicy>;
+
+    let sink = FileSink::new(&file, Some(policy)).unwrap();
+    // Trigger write -> should rotate because injected now is next day.
+    sink.write(b"new line\n").unwrap();
+
+    // A dated backup should exist.
+    let mut found_backup = false;
+    for entry in std::fs::read_dir(&dir).unwrap() {
+        let p = entry.unwrap().path();
+        let name = p.file_name().unwrap().to_string_lossy();
+        if name.starts_with("date.json.") && name != "date.json" {
+            found_backup = true;
+        }
+    }
+    assert!(found_backup, "expected a dated backup file");
+
+    // New file should contain new line.
+    let content = std::fs::read_to_string(&file).unwrap();
+    assert!(content.contains("new line"), "content: {}", content);
+
+    // cleanup
+    for entry in std::fs::read_dir(&dir).unwrap() {
+        let _ = std::fs::remove_file(entry.unwrap().path());
     }
 }

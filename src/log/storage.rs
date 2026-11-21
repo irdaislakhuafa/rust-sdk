@@ -22,13 +22,32 @@ impl StorageDriver {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum RotationKind {
+    #[default]
+    Date,
+    Size,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum DateRotationInterval {
+    #[default]
+    Daily,
+    Hourly,
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct StorageRotation {
     pub enable: bool,
+    pub kind: RotationKind,
+    // size-based
     pub max_size: i32,
     pub max_backups: i32,
     pub max_age: i32,
     pub compress: bool,
+    // date-based
+    pub date_interval: DateRotationInterval,
+    pub date_format: String,
 }
 
 #[derive(Debug, Clone)]
